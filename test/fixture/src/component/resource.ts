@@ -17,7 +17,6 @@ export const ensureInstance = action({
       workflowFile: v.string(),
     }),
     account: v.object({ token: v.string() }),
-    oneTimePassword: v.optional(v.string()),
   },
   returns: v.union(
     v.object({ status: v.literal("ready"), instanceId: v.string(), instance }),

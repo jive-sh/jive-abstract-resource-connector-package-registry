@@ -32,9 +32,9 @@ export type PackageRegistryComponentApi<Name extends string | undefined = string
    * creates the placeholder if the package is missing (refusing one another account maintains), keeps a trusted
    * publisher for the caller that has published or was registered recently enough not to have expired, and
    * otherwise replaces it. The package is bound to the code repository that first provisioned it; another one is
-   * refused. A write the registry guards with its second factor answers `personNeeded`: `url` is the registry's
-   * page and `resultUrl` is where the one-time password is polled. The caller retries with that password as
-   * `oneTimePassword`.
+   * refused. A write the registry guards with its security key answers `personNeeded`: `url` is the registry's
+   * page. The connector does not take a password. Registering that key on the account is part of instantiating
+   * the connection, and OpenSK answers the prompt.
    */
   resource: {
     ensureInstance: FunctionReference<"action", "internal", EnsureInstanceArgs, EnsureInstanceResult<PackageRegistryInstance>, Name>;
@@ -99,15 +99,12 @@ export type EnsureInstanceArgs = {
   caller: ResourceCaller;
   /** The organization's account on the registry, which creates the package and registers its publisher. */
   account: RegistryAccount;
-  /** The one-time password polled from `personNeeded.resultUrl`, when retrying a write the registry guarded. */
-  oneTimePassword?: string;
 };
 
 /**
- * The registry wants its second factor before this write. `pageUrl` is the registry's own page where the person
- * whose account this is answers it (on npm, a page on www.npmjs.com, in that person's own browser); `resultUrl` is
- * where the caller polls for the one-time password that answer produces (on npm, a registry endpoint), which it
- * then passes back as `oneTimePassword` on the same call. The connector never answers a second factor itself.
+ * The registry wants its security key before this write. `pageUrl` is the registry's own page (on npm, a page on
+ * www.npmjs.com). `resultUrl` is npm's `doneUrl`. The connector does not accept a password and does not answer the
+ * key itself. Registering the key on the account is part of instantiating the connection; OpenSK answers the prompt.
  */
 export type SecondFactorRequired = { status: "secondFactorRequired"; pageUrl: string; resultUrl: string };
 
@@ -115,8 +112,6 @@ export type CreatePlaceholderArgs = {
   packageName: string;
   /** The account that will own the package. */
   account: RegistryAccount;
-  /** The one-time password a person's answer on `SecondFactorRequired.pageUrl` produced, when retrying. */
-  oneTimePassword?: string;
 };
 
 export type CreatePlaceholderResult =
@@ -130,8 +125,6 @@ export type RegisterTrustedPublisherArgs = {
   publisher: TrustedPublisherClaims;
   /** An account that maintains the package. */
   account: RegistryAccount;
-  /** The one-time password a person's answer on `SecondFactorRequired.pageUrl` produced, when retrying. */
-  oneTimePassword?: string;
 };
 
 export type RegisterTrustedPublisherResult =
@@ -145,8 +138,6 @@ export type RemoveTrustedPublisherArgs = {
   id: string;
   /** An account that maintains the package. */
   account: RegistryAccount;
-  /** The one-time password a person's answer on `SecondFactorRequired.pageUrl` produced, when retrying. */
-  oneTimePassword?: string;
 };
 
 export type RemoveTrustedPublisherResult = { status: "removed" } | { status: "notFound" } | SecondFactorRequired;

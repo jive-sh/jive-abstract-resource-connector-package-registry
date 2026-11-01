@@ -17,7 +17,7 @@ publish it by trusted publishing:
 
 | Function | Arguments | Returns |
 | --- | --- | --- |
-| `resource.ensureInstance` | `{ instance: { packageName }, caller, account, oneTimePassword? }` | `EnsureInstanceResult<{ packageName }>`: `ready` (with `instanceId`), `inProgress`, `personNeeded` (`url` is the registry's page, `resultUrl` is where the one-time password is polled), or `refused` |
+| `resource.ensureInstance` | `{ instance: { packageName }, caller, account }` | `EnsureInstanceResult<{ packageName }>`: `ready` (with `instanceId`), `inProgress`, `personNeeded` (`url` is the registry's security-key page), or `refused` |
 
 - `caller` is a `ResourceCaller`: the code repository (`{ id, owner, name }`), environment and workflow file of the
   deploy job asking.
@@ -42,10 +42,10 @@ registers the publisher only when that workflow is about to run, and replaces on
 | Function | Arguments | Returns |
 | --- | --- | --- |
 | `packageExists` | `{ packageName }` | `boolean` |
-| `createPlaceholder` | `{ packageName, account, oneTimePassword? }` | `{ status: "created", version }` \| `{ status: "alreadyExists" }` \| `{ status: "maintainedByAnotherAccount" }` \| `secondFactorRequired` |
+| `createPlaceholder` | `{ packageName, account }` | `{ status: "created", version }` \| `{ status: "alreadyExists" }` \| `{ status: "maintainedByAnotherAccount" }` \| `secondFactorRequired` |
 | `listTrustedPublishers` | `{ packageName, account }` | `Array<{ id, claims, status: "validated" \| "unvalidated" }>` |
-| `registerTrustedPublisher` | `{ packageName, publisher, account, oneTimePassword? }` | `{ status: "registered" }` \| `{ status: "alreadyRegistered", id }` \| `secondFactorRequired` |
-| `removeTrustedPublisher` | `{ packageName, id, account, oneTimePassword? }` | `{ status: "removed" }` \| `{ status: "notFound" }` \| `secondFactorRequired` |
+| `registerTrustedPublisher` | `{ packageName, publisher, account }` | `{ status: "registered" }` \| `{ status: "alreadyRegistered", id }` \| `secondFactorRequired` |
+| `removeTrustedPublisher` | `{ packageName, id, account }` | `{ status: "removed" }` \| `{ status: "notFound" }` \| `secondFactorRequired` |
 
 - A **trusted publisher** lets one CI workflow publish the package with its OIDC identity instead of a token.
   `publisher` (and each listed publisher's `claims`) is `{ provider: "github", repository: { owner, name },
@@ -57,12 +57,12 @@ registers the publisher only when that workflow is about to run, and replaces on
 - **`account`** is `{ token }`: one person's own account on the registry, `token` from that person's login. A
   connector stores no credentials; whoever calls it passes the account to act as on every call, so one installed
   connector serves every person's account, and where credentials are kept is the caller's decision.
-- **A second factor is answered by passing its one-time password back.** When the registry guards a write with its
-  second factor, the write answers `{ status: "secondFactorRequired", pageUrl, resultUrl }`, and `ensureInstance`
-  answers `personNeeded` with that page as `url` and that poll address as `resultUrl`. The caller polls `resultUrl`
-  for the one-time password and repeats the call with it as `oneTimePassword`, which the connector sends to the
-  registry. The connector holds no second-factor secret and does not run the registry's page itself. On npm one
-  answer can cover several writes, through the page's "skip two-factor authentication for the next 5 minutes" option.
+- **The second factor is the account's security key, not a password the call carries.** When the registry guards a
+  write, the write answers `{ status: "secondFactorRequired", pageUrl, resultUrl }` and `ensureInstance` answers
+  `personNeeded` with that page as `url`. `pageUrl` is the page the registry returned for using a key already on
+  the account. OpenSK answers that prompt. No argument is a one-time password, and the connector does not send
+  one. Adding the key is part of instantiating the connection and is the registry's own website, not this
+  `pageUrl`. `resultUrl` is the registry's own done address; this contract does not poll it.
 - **`createPlaceholder`** never touches an existing package. It answers `alreadyExists` only when `account`
   maintains the package, and `maintainedByAnotherAccount` when it doesn't, so a caller never goes on to
   register a publisher on someone else's package.

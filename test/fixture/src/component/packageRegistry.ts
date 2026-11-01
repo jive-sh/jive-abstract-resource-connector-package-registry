@@ -11,7 +11,7 @@ const claims = v.object({
 /** The account an operation acts as; its caller supplies it on every call, so the component stores no credential. */
 const account = v.object({ token: v.string() });
 
-/** The registry wants a person to answer its second factor on `pageUrl`; the caller polls `resultUrl` and retries with `oneTimePassword`. */
+/** The registry wants its security key. `pageUrl` is its page. The connector does not take a password. */
 const secondFactorRequired = v.object({ status: v.literal("secondFactorRequired"), pageUrl: v.string(), resultUrl: v.string() });
 
 function notImplemented(name: string): never {
@@ -27,7 +27,7 @@ export const packageExists = action({
 
 /** Creates the package by publishing an empty placeholder version as `account`; an existing package is reported, not touched. */
 export const createPlaceholder = action({
-  args: { packageName: v.string(), account, oneTimePassword: v.optional(v.string()) },
+  args: { packageName: v.string(), account },
   returns: v.union(
     v.object({ status: v.literal("created"), version: v.string() }),
     v.object({ status: v.literal("alreadyExists") }),
@@ -46,7 +46,7 @@ export const listTrustedPublishers = action({
 
 /** Lets one CI workflow publish the package with its OIDC identity; an identical publisher is reported, not added again. */
 export const registerTrustedPublisher = action({
-  args: { packageName: v.string(), publisher: claims, account, oneTimePassword: v.optional(v.string()) },
+  args: { packageName: v.string(), publisher: claims, account },
   returns: v.union(
     v.object({ status: v.literal("registered") }),
     v.object({ status: v.literal("alreadyRegistered"), id: v.string() }),
@@ -57,7 +57,7 @@ export const registerTrustedPublisher = action({
 
 /** Deletes one trusted publisher by its id; one already gone is reported as notFound. */
 export const removeTrustedPublisher = action({
-  args: { packageName: v.string(), id: v.string(), account, oneTimePassword: v.optional(v.string()) },
+  args: { packageName: v.string(), id: v.string(), account },
   returns: v.union(v.object({ status: v.literal("removed") }), v.object({ status: v.literal("notFound") }), secondFactorRequired),
   handler: async () => notImplemented("removeTrustedPublisher"),
 });
