@@ -88,7 +88,25 @@ error TS2322: Type 'true' is not assignable to type '"packageRegistry.packageExi
 A connector may expose more functions than the contract's. The contract is a type only: a connector depends on
 this package as a dev dependency, and nothing of it ships in an installing app.
 
+## Decisions
+
+- **Connector packages are unscoped** (Alex, 2026-10-26), e.g. `jive-resource-connector-package-registry-npm`.
+- **Second factor.** On 2026-10-26 Alex chose to hold the account's authenticator (TOTP) secret in Jive ("for
+  blocker 1, option a, we'll hold the totp secret in jive"), so in contract 0.3.0 (as
+  `jive-abstract-connector-package-registry`) an account was `{ token, secondFactor: { type: "totp", secret } }`, and
+  the npm connector answered with the current RFC 6238 code. Since contract 0.4.0, unchanged here in 0.1.0, an
+  account is `{ token }` and a person answers the second factor on the registry's own page (`secondFactorRequired`).
+  `@jive-sh/server` refuses a provisioning that meets one, naming the page, until something passes the answer
+  back; `@jive-sh/cloud-sk` is the work toward that.
+
+## Working on the test fixture
+
+`test/fixture` depends on this package as `file:../..`, so each local fixture install copies the previous install's
+`node_modules` into itself until `find`, `git status` and installs hang. Run
+`rm -rf test/fixture/node_modules` before installing, and use `git status -uno` inside the fixture.
+
 ## Open questions
 
 - GitHub Actions is the only trusted-publisher provider.
 - `packageExists` takes no account, so it sees public packages only.
+- Deprecating the `0.0.0` placeholder once a package's first CI release lands is not built.
