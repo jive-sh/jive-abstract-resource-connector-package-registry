@@ -1,8 +1,10 @@
 import type { FunctionReference } from "convex/server";
+import type { EnsureInstanceResult, ResourceCaller } from "jive-abstract-resource";
 
 /**
- * The functions every package-registry connector exposes, in the module `packageRegistry`
- * (`src/component/packageRegistry.ts`), exactly as its generated `ComponentApi` must type them. An app holding
+ * The functions every package-registry connector exposes, exactly as its generated `ComponentApi` must type them:
+ * the standard `resource.ensureInstance` (`src/component/resource.ts`), and five registry operations in the module
+ * `packageRegistry` (`src/component/packageRegistry.ts`) it is built from. An app holding
  * a registry connector, such as `@jive-sh/server`, calls them the same way whichever registry it is.
  *
  * Jive provisions a new package in three steps, the first two through this contract:
@@ -16,7 +18,7 @@ import type { FunctionReference } from "convex/server";
  * `listTrustedPublishers` says which publishers have published (`validated`) and `removeTrustedPublisher` deletes
  * one, so a caller can replace a publisher that never published.
  *
- * All five are actions, since each calls the registry over the network. Each type is written out without
+ * All six are actions, since each calls the registry over the network. Each type is written out without
  * intersections, the way Convex generates it, because the build compares the two for exact equality.
  *
  * A connector stores no credentials. A function that acts as an account is given that account's credentials by
@@ -24,6 +26,17 @@ import type { FunctionReference } from "convex/server";
  * credentials live, and how they are refreshed, is the caller's decision.
  */
 export type PackageRegistryComponentApi<Name extends string | undefined = string | undefined> = {
+  /**
+   * The standard call every resource kind has (jive-abstract-resource): make sure one package exists in the registry
+   * and that the caller's workflow and environment may publish it by trusted publishing. It runs the steps below:
+   * creates the placeholder if the package is missing (refusing one another account maintains), keeps a trusted
+   * publisher for the caller that has published or was registered recently enough not to have expired, and
+   * otherwise replaces it. The package is bound to the code repository that first provisioned it; another one is
+   * refused. A write the registry guards with its second factor answers `personNeeded` with the registry's page.
+   */
+  resource: {
+    ensureInstance: FunctionReference<"action", "internal", EnsureInstanceArgs, EnsureInstanceResult<PackageRegistryInstance>, Name>;
+  };
   packageRegistry: {
     /** Whether the registry has any version of the package. */
     packageExists: FunctionReference<"action", "internal", { packageName: string }, boolean, Name>;
@@ -72,6 +85,18 @@ export type PackageRegistryComponentApi<Name extends string | undefined = string
  */
 export type RegistryAccount = {
   token: string;
+};
+
+/** One instance of a package-registry resource: a package, as a package's jive block declares it. */
+export type PackageRegistryInstance = {
+  packageName: string;
+};
+
+export type EnsureInstanceArgs = {
+  instance: PackageRegistryInstance;
+  caller: ResourceCaller;
+  /** The organization's account on the registry, which creates the package and registers its publisher. */
+  account: RegistryAccount;
 };
 
 /**

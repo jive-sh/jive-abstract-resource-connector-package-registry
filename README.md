@@ -9,9 +9,25 @@ This package was `jive-abstract-connector-package-registry` until 0.4.0; the con
 
 ## The contract
 
-A connector of this kind exposes five actions in the module `packageRegistry`
-(`src/component/packageRegistry.ts`). The exported type `PackageRegistryComponentApi` is the contract. They
-cover the first two of the three steps by which Jive provisions a new package:
+A connector of this kind exposes six actions. The exported type `PackageRegistryComponentApi` is the contract.
+
+**The standard call, `resource.ensureInstance`** (`src/component/resource.ts`), is the one every resource kind
+has (jive-abstract-resource). It makes sure one package exists and that the caller's workflow and environment may
+publish it by trusted publishing:
+
+| Function | Arguments | Returns |
+| --- | --- | --- |
+| `resource.ensureInstance` | `{ instance: { packageName }, caller, account }` | `EnsureInstanceResult<{ packageName }>`: `ready` (with `instanceId`), `inProgress`, `personNeeded` (the registry's second-factor page), or `refused` |
+
+- `caller` is a `ResourceCaller`: the code repository (`{ id, owner, name }`), environment and workflow file of the
+  deploy job asking.
+- `account` is the organization's account on the registry.
+- The connector records the package in its own tables, bound to the code repository that first provisioned it.
+- `@jive-sh/server`'s `resources:provision` calls it for kind `connector-package-registry`.
+
+**Five registry operations in the module `packageRegistry`** (`src/component/packageRegistry.ts`) are what
+`ensureInstance` is built from. They cover the first two of the three steps by which Jive provisions a new
+package:
 
 1. `createPlaceholder` creates the package by publishing an empty version as a person's account.
 2. `registerTrustedPublisher` lets the package's CI workflow (`pipeline.yml` in its repository) publish it.

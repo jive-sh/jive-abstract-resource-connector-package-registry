@@ -6,7 +6,9 @@
 export type {
   CreatePlaceholderArgs,
   CreatePlaceholderResult,
+  EnsureInstanceArgs,
   PackageRegistryComponentApi,
+  PackageRegistryInstance,
   RegisterTrustedPublisherArgs,
   RegisterTrustedPublisherResult,
   RegistryAccount,
@@ -16,5 +18,6 @@ export type {
   TrustedPublisher,
   TrustedPublisherClaims,
 } from "./internal/public/contract";
+export type { EnsureInstanceResult, ResourceCaller } from "jive-abstract-resource";
 export { packageRegistryAbstract } from "./internal/public/package-registry";
 export { packageRegistryScaffold } from "./internal/public/scaffold";

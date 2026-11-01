@@ -9,6 +9,7 @@
  */
 
 import type * as packageRegistry from "../packageRegistry.js";
+import type * as resource from "../resource.js";
 
 import type {
   ApiFromModules,
@@ -19,6 +20,7 @@ import { anyApi, componentsGeneric } from "convex/server";
 
 const fullApi: ApiFromModules<{
   packageRegistry: typeof packageRegistry;
+  resource: typeof resource;
 }> = anyApi as any;
 
 /**
