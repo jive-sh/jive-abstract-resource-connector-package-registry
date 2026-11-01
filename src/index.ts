@@ -1,7 +1,7 @@
 /**
  * The public surface of this abstract: the contract every package-registry connector implements, for the apps
  * that call such connectors and for the build that checks them. Connector packages reach the hooks through the
- * `jive-connector-package-registry` CLI.
+ * `jive-resource-connector-package-registry` CLI.
  */
 export type {
   CreatePlaceholderArgs,

@@ -1,4 +1,4 @@
-import type { ScaffoldFiles, ScaffoldInput } from "jive-abstract-connector";
+import type { ScaffoldFiles, ScaffoldInput } from "jive-abstract-resource-connector";
 
 function lines(...text: ReadonlyArray<string>): string {
   return `${text.join("\n")}\n`;

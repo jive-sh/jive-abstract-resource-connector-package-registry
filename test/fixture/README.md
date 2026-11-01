@@ -1,13 +1,13 @@
-# jive-abstract-connector-package-registry-fixture
+# jive-abstract-resource-connector-package-registry-fixture
 
 A Jive connector: a Convex component, `fixture`, published to npm. It extends
-`jive-abstract-connector-package-registry`, whose `jive-connector-package-registry` CLI builds, audits and publishes it.
+`jive-abstract-resource-connector-package-registry`, whose `jive-resource-connector-package-registry` CLI builds, audits and publishes it.
 
 ## Install it in a Convex app
 
 ```ts
 // convex/convex.config.ts
-import fixture from "jive-abstract-connector-package-registry-fixture/convex.config.js";
+import fixture from "jive-abstract-resource-connector-package-registry-fixture/convex.config.js";
 
 const app = defineApp();
 app.use(fixture); // pass { env: { ... } } if the component declares environment variables

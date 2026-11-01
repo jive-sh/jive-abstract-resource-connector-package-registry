@@ -4,13 +4,13 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 /**
- * Runs the hooks against test/fixture, a package-registry connector made by `jive-connector-package-registry
- * create` and left as scaffolded. What every connector's hooks do is jive-abstract-connector's to test; this
+ * Runs the hooks against test/fixture, a package-registry connector made by `jive-resource-connector-package-registry
+ * create` and left as scaffolded. What every connector's hooks do is jive-abstract-resource-connector's to test; this
  * checks what this abstract adds: the scaffold implements the contract, and build refuses a component that
  * doesn't. Every backend is an anonymous local one; deploy is not run, since it would publish to npm.
  */
 
-const CLI = resolve(import.meta.dir, "../src/entrypoints/jive-connector-package-registry.ts");
+const CLI = resolve(import.meta.dir, "../src/entrypoints/jive-resource-connector-package-registry.ts");
 const FIXTURE_DIR = resolve(import.meta.dir, "fixture");
 const TIMEOUT = 5 * 60 * 1000;
 const scratchDirs: Array<string> = [];
@@ -26,7 +26,7 @@ function hook(script: string, cwd = FIXTURE_DIR) {
 
 /** A copy of the fixture whose package-registry module is `source`, with its generated code regenerated to match. */
 function fixtureWithModule(source: string): string {
-  const dir = mkdtempSync(join(tmpdir(), "jive-connector-package-registry-fixture-"));
+  const dir = mkdtempSync(join(tmpdir(), "jive-resource-connector-package-registry-fixture-"));
   scratchDirs.push(dir);
   cpSync(FIXTURE_DIR, dir, {
     recursive: true,
@@ -34,7 +34,7 @@ function fixtureWithModule(source: string): string {
   });
   const packageJson = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
   for (const [name, script] of Object.entries<string>(packageJson.scripts)) {
-    packageJson.scripts[name] = script.replace("../../src/entrypoints/jive-connector-package-registry.ts", CLI);
+    packageJson.scripts[name] = script.replace("../../src/entrypoints/jive-resource-connector-package-registry.ts", CLI);
   }
   writeFileSync(join(dir, "package.json"), `${JSON.stringify(packageJson, null, 2)}\n`);
   writeFileSync(join(dir, "src/component/packageRegistry.ts"), source);

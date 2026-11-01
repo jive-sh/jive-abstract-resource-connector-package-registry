@@ -1,9 +1,11 @@
-# jive-abstract-connector-package-registry
+# jive-abstract-resource-connector-package-registry
 
 A Jive abstract for **package-registry connectors**: connectors to npm, GitHub Packages, JSR and the like. It
-extends [`jive-abstract-connector`](https://github.com/jive-sh/jive-abstract-connector), which makes a connector a
-Convex component published to npm, and adds the contract every registry connector implements, so an app such as
-`@jive-sh/server` calls any registry the same way. Its CLI is `jive-connector-package-registry`.
+extends [`jive-abstract-resource-connector`](https://github.com/jive-sh/jive-abstract-resource-connector), which makes a connector a resource (a
+Convex component published to npm, through [`jive-abstract-resource`](https://github.com/jive-sh/jive-abstract-resource)), and adds the contract every registry connector implements, so an app such as
+`@jive-sh/server` calls any registry the same way. Its CLI is `jive-resource-connector-package-registry`.
+
+This package was `jive-abstract-connector-package-registry` until 0.4.0; the contract is unchanged from that release.
 
 ## The contract
 
@@ -53,12 +55,12 @@ registers the publisher only when that workflow is about to run, and replaces on
 
 ```ts
 // An app calling whichever registry connector it installed as `registry`
-import type { PackageRegistryComponentApi, RegistryAccount } from "jive-abstract-connector-package-registry";
+import type { PackageRegistryComponentApi, RegistryAccount } from "jive-abstract-resource-connector-package-registry";
 
 async function allowPipelineToPublish(ctx: ActionCtx, registry: PackageRegistryComponentApi, account: RegistryAccount) {
   return await ctx.runAction(registry.packageRegistry.registerTrustedPublisher, {
-    packageName: "jive-abstract-connector",
-    publisher: { provider: "github", repository: { owner: "jive-sh", name: "jive-abstract-connector" }, workflowFile: "pipeline.yml", environment: "latest" },
+    packageName: "jive-abstract-resource-connector",
+    publisher: { provider: "github", repository: { owner: "jive-sh", name: "jive-abstract-resource-connector" }, workflowFile: "pipeline.yml", environment: "latest" },
     account,
   });
 }
@@ -67,12 +69,12 @@ async function allowPipelineToPublish(ctx: ActionCtx, registry: PackageRegistryC
 ## Create a registry connector
 
 ```sh
-bunx jive-connector-package-registry create jive-connector-package-registry-example
+bunx jive-resource-connector-package-registry create jive-resource-connector-package-registry-example
 ```
 
 The scaffold declares all five functions with validators that match the contract and handlers that throw
 "not implemented", so it builds from the start. Everything else (layout, `codegen`, the hooks, environment
-variables) is `jive-abstract-connector`'s; see its README.
+variables) is `jive-abstract-resource`'s; see its README.
 
 ## What this abstract adds to the hooks
 
