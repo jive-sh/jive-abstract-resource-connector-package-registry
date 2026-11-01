@@ -32,7 +32,9 @@ export type PackageRegistryComponentApi<Name extends string | undefined = string
    * creates the placeholder if the package is missing (refusing one another account maintains), keeps a trusted
    * publisher for the caller that has published or was registered recently enough not to have expired, and
    * otherwise replaces it. The package is bound to the code repository that first provisioned it; another one is
-   * refused. A write the registry guards with its second factor answers `personNeeded` with the registry's page.
+   * refused. A write the registry guards with its second factor answers `personNeeded`: `url` is the registry's
+   * page and `resultUrl` is where the one-time password is polled. The caller retries with that password as
+   * `oneTimePassword`.
    */
   resource: {
     ensureInstance: FunctionReference<"action", "internal", EnsureInstanceArgs, EnsureInstanceResult<PackageRegistryInstance>, Name>;
@@ -97,6 +99,8 @@ export type EnsureInstanceArgs = {
   caller: ResourceCaller;
   /** The organization's account on the registry, which creates the package and registers its publisher. */
   account: RegistryAccount;
+  /** The one-time password polled from `personNeeded.resultUrl`, when retrying a write the registry guarded. */
+  oneTimePassword?: string;
 };
 
 /**

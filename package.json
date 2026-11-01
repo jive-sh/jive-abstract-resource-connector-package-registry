@@ -3,7 +3,7 @@
   "license": "MIT",
   "name": "jive-abstract-resource-connector-package-registry",
   "description": "A Jive abstract for package-registry connectors: extends jive-abstract-resource-connector with the functions every package-registry connector exposes, such as checking a package exists and registering a trusted publisher.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "types": "./src/index.ts",
   "peerDependencies": {
@@ -12,7 +12,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "jive-abstract-resource": "^0.1.1",
+    "jive-abstract-resource": "^0.2.0",
     "jive-abstract-resource-connector": "^0.1.0"
   },
   "devDependencies": {

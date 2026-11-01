@@ -17,7 +17,7 @@ publish it by trusted publishing:
 
 | Function | Arguments | Returns |
 | --- | --- | --- |
-| `resource.ensureInstance` | `{ instance: { packageName }, caller, account }` | `EnsureInstanceResult<{ packageName }>`: `ready` (with `instanceId`), `inProgress`, `personNeeded` (the registry's second-factor page), or `refused` |
+| `resource.ensureInstance` | `{ instance: { packageName }, caller, account, oneTimePassword? }` | `EnsureInstanceResult<{ packageName }>`: `ready` (with `instanceId`), `inProgress`, `personNeeded` (`url` is the registry's page, `resultUrl` is where the one-time password is polled), or `refused` |
 
 - `caller` is a `ResourceCaller`: the code repository (`{ id, owner, name }`), environment and workflow file of the
   deploy job asking.
@@ -57,12 +57,12 @@ registers the publisher only when that workflow is about to run, and replaces on
 - **`account`** is `{ token }`: one person's own account on the registry, `token` from that person's login. A
   connector stores no credentials; whoever calls it passes the account to act as on every call, so one installed
   connector serves every person's account, and where credentials are kept is the caller's decision.
-- **A second factor is always answered by a person.** When the registry guards a write with its second factor,
-  the write answers `{ status: "secondFactorRequired", pageUrl, resultUrl }`: the person opens `pageUrl` (the
-  registry's own page, in their own browser) and answers there; the caller polls `resultUrl` for the one-time
-  password that produces and repeats the call with it as `oneTimePassword`. The connector never answers a second
-  factor itself and holds no second-factor secret. On npm one answer can cover several writes, through the page's
-  "skip two-factor authentication for the next 5 minutes" option.
+- **A second factor is answered by passing its one-time password back.** When the registry guards a write with its
+  second factor, the write answers `{ status: "secondFactorRequired", pageUrl, resultUrl }`, and `ensureInstance`
+  answers `personNeeded` with that page as `url` and that poll address as `resultUrl`. The caller polls `resultUrl`
+  for the one-time password and repeats the call with it as `oneTimePassword`, which the connector sends to the
+  registry. The connector holds no second-factor secret and does not run the registry's page itself. On npm one
+  answer can cover several writes, through the page's "skip two-factor authentication for the next 5 minutes" option.
 - **`createPlaceholder`** never touches an existing package. It answers `alreadyExists` only when `account`
   maintains the package, and `maintainedByAnotherAccount` when it doesn't, so a caller never goes on to
   register a publisher on someone else's package.
